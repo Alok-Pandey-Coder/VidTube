@@ -16,7 +16,7 @@ const videoSchema = new Schema(
     },
     storageProvider: {
       type: String,
-      enum: ['cloudinary', 'local', 's3'],
+      enum: ['cloudinary', 'local', 's3', 'r2'],
       default: 'cloudinary', // purane videos automatically "cloudinary" maane jayenge
     },
     status: {

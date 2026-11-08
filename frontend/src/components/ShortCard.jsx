@@ -4,13 +4,14 @@ import { Eye, Play } from 'lucide-react';
 import ShortsIcon from './ShortsIcon';
 import { formatCompactNumber } from '../utils/formatters';
 import { useTheme } from '../context/ThemeContext';
+import { mediaUrl } from '../utils/media';
 
 export default function ShortCard({ video }) {
   const { currentTheme } = useTheme();
   if (!video) return null;
 
   const id = video._id || video.id;
-  const thumbnail = video.thumbnail || (video.previewKey ? `/media/${video.previewKey}` : '');
+  const thumbnail = video.thumbnail || mediaUrl(video, video.previewKey) || '';
   const views = video.views || 0;
 
   return (

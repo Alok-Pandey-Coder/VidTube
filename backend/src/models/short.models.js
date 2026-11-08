@@ -9,7 +9,7 @@ const shortSchema = new Schema(
     storageKey: { type: String },
     storageProvider: {
       type: String,
-      enum: ['cloudinary', 'local', 's3'],
+      enum: ['cloudinary', 'local', 's3', 'r2'],
       default: 'cloudinary',
     },
     status: {

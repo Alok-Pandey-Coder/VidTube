@@ -8,7 +8,7 @@ import { DB_NAME } from '../src/constants.js';
 import os from 'os';
 import path from 'path';
 import fs from 'fs/promises';
-import { getFilePath, saveHlsOutput } from '../services/storage.js';
+import { getLocalCopy, saveHlsOutput } from '../services/storage.js';
 import { probeVideo, transcodeTOHls, createPreview, extractAudio } from '../services/ffmpeg.js';
 import { invalidateVideo } from '../src/utils/cache.js';
 import { notifyUser, notifySubscribers } from '../services/notify.js';
@@ -34,13 +34,14 @@ const worker = new Worker(
     const video = await Video.findByIdAndUpdate(videoId, { status: 'processing' });
     if (!video) throw new Error(`Video ${videoId} not found`);
 
-    const inputPath = getFilePath(video.storageKey);
-    const { width, height, duration } = await probeVideo(inputPath);
-    console.log(`[job ${job.id}] source ${width}x${height}, ${duration}s`);
-
     const tmpDir = path.join(os.tmpdir(), `vidtube-hls-${videoId}`);
     const hlsPrefix = `videos/${videoId}/hls`;
+    let local;
     try {
+      local = await getLocalCopy(video.storageKey, video.storageProvider);
+      const inputPath = local.path;
+      const { width, height, duration } = await probeVideo(inputPath);
+      console.log(`[job ${job.id}] source ${width}x${height}, ${duration}s`);
       await fs.rm(tmpDir, { recursive: true, force: true });
       await fs.mkdir(tmpDir, { recursive: true });
 
@@ -137,6 +138,7 @@ const worker = new Worker(
         console.log(`[job ${job.id}] captions skipped:`, err.message);
       }
     } finally {
+      await local?.cleanup();
       await fs.rm(tmpDir, { recursive: true, force: true });
     }
 
