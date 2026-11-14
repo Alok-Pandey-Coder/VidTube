@@ -389,6 +389,7 @@ export default function VideoPlayer({
         autoPlay
         playsInline
         className="w-full h-full object-contain"
+        crossOrigin={captionsUrl?.startsWith('http') ? 'anonymous' : undefined}
         onError={() => setError(true)}
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}

@@ -6,7 +6,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { deleteFromCloudinary, uploadOnCloudinary } from '../utils/cloudinary.js';
-import { saveOriginal, deleteFile } from '../../services/storage.js';
+import { saveOriginal, deleteFile, storageProvider } from '../../services/storage.js';
 import { videoQueue } from '../../queues/videoQueue.js';
 import { connection } from '../../config/redis.js';
 import { cached, invalidateVideo } from '../utils/cache.js';
@@ -34,6 +34,7 @@ const ownerStages = [
       createdAt: 1,
       duration: 1,
       previewKey: 1,
+      storageProvider: 1,
       owner: { _id: '$owner._id', username: '$owner.username', avatar: '$owner.avatar' },
     },
   },
@@ -253,7 +254,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
       title,
       description,
       storageKey, // CHANGE 3
-      storageProvider: 'local', // CHANGE 3
+      storageProvider: storageProvider(), // CHANGE 3
       status: 'uploaded', // CHANGE 3
       thumbnail: uploadedThumbnail?.url,
       isShort: Boolean(req.body.isShort === 'true' || req.body.isShort === true) || Boolean(title?.toLowerCase().includes('#shorts')),

@@ -8,6 +8,8 @@ import * as Sentry from '@sentry/node';
 import { logger } from './utils/logger.js';
 import { ApiError } from './utils/ApiError.js';
 import { sharePage, robots, sitemap } from './controllers/share.controller.js';
+import path from "path"
+import fs from "fs"
 
 
 const app = express();
@@ -85,6 +87,29 @@ app.use('/api/v1/shorts', shortRouter);
 app.get('/share/watch/:videoId', sharePage);
 app.get('/robots.txt', robots);
 app.get('/sitemap.xml', sitemap);
+
+const BOT = /facebookexternalhit|twitterbot|whatsapp|telegrambot|slackbot|linkedinbot|discordbot|googlebot|bingbot/i;
+app.get('/watch/:videoId', (req, res, next) =>
+  BOT.test(req.get('user-agent') || '') ? sharePage(req, res, next) : next(),
+);
+
+const appDir = path.resolve('public-app');
+if (fs.existsSync(appDir)) {
+  app.use(
+    express.static(appDir, {
+      index: false,
+      maxAge: '1h',
+      setHeaders: (res, p) => {
+        if (p.endsWith('sw.js') || p.endsWith('manifest.webmanifest')) {
+          res.setHeader('Cache-Control', 'no-cache');
+        }
+      },
+    }),
+  );
+  app.get(/^\/(?!api\/|media\/|share\/).*/, (_req, res) =>
+    res.sendFile(path.join(appDir, 'index.html')),
+  );
+}
 
 Sentry.setupExpressErrorHandler(app);
 

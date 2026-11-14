@@ -25,6 +25,7 @@ import { formatViews, timeAgo, formatDuration } from '../utils/formatters';
 import TranscriptPanel from '../components/TranscriptPanel';
 import usePageTitle from '../hooks/usePageTitle';
 import WatchSkeleton, { UpNextSkeleton } from '../components/WatchSkeleton';
+import { mediaUrl } from '../utils/media';
 
 const THEATER_KEY = 'vidtube_theater';
 
@@ -222,7 +223,7 @@ export default function WatchPage() {
   // Relative /media URL
   const legacyUrl = video.videoFile?.url || video.videoFile;
   const videoSourceUrl = video.hlsKey
-    ? `/media/${video.hlsKey}`
+    ? mediaUrl(video, video.hlsKey)
     : typeof legacyUrl === 'string' ? legacyUrl : null;
 
   const owner = video.owner || {};
@@ -254,7 +255,7 @@ export default function WatchPage() {
               canSave={isAuthenticated}
               theater={theater}
               onToggleTheater={toggleTheater}
-              captionsUrl={video.captionsKey ? `/media/${video.captionsKey}` : null} 
+              captionsUrl={mediaUrl(video, video.captionsKey)} 
               captionsLang={video.captionsLang}
               playerApiRef={playerApiRef}
             />

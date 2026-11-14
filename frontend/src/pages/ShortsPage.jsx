@@ -585,7 +585,7 @@ function ShortItem({
   const [isDescExpanded, setIsDescExpanded] = useState(false);
 
   const videoUrl = video.hlsKey
-    ? `/media/${video.hlsKey}`
+    ? mediaUrl(video, video.hlsKey)
     : video.videoFile?.url || video.videoFile;
 
   // Setup HLS or regular video stream when within active range

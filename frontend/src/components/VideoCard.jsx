@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Play, CheckCircle2, MoreVertical, ListPlus } from 'lucide-react';
 import { formatDuration, formatViews, timeAgo } from '../utils/formatters';
 import useHoverPreview from '../hooks/useHoverPreview';
+import { mediaUrl } from '../utils/media';
 import SaveToPlaylistModal from './SaveToPlaylistModal';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -133,7 +134,7 @@ export default function VideoCard({ video, layout = 'grid' }) {
 
           {preview.active && (
             <video
-              src={`/media/${video.previewKey}`}
+              src={mediaUrl(video, video.previewKey)}
               muted
               loop
               autoPlay

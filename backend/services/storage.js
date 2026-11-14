@@ -1,7 +1,11 @@
 import fs from "fs/promises";
 import path from "path";
+import { r2Put, r2PutDir, r2Download, r2Delete } from './r2.js';
 
 const ROOT = path.resolve(process.cwd(), "storage");
+
+const useR2 = () => process.env.STORAGE_DRIVER === 'r2';
+export const storageProvider = () => (useR2() ? 'r2' : 'local');
 
 // key ko safe absolute path me convert karta hai
 function resolveKey(key) {
@@ -14,6 +18,11 @@ function resolveKey(key) {
 
 // 1) Original uploaded file ko storage me rakhna
 export async function saveOriginal(localPath, key) {
+  if (useR2()) {
+    await r2Put(localPath, key);
+    await fs.unlink(localPath);
+    return key;
+  }
   const dest = resolveKey(key);
   await fs.mkdir(path.dirname(dest), { recursive: true });
   try {
@@ -34,6 +43,10 @@ export function getFilePath(key) {
 
 // 3) HLS output folder ko storage me rakhna
 export async function saveHlsOutput(localDir, keyPrefix) {
+    if (useR2()) {
+    await r2PutDir(localDir, keyPrefix);
+    return keyPrefix;
+  }
   const dest = resolveKey(keyPrefix);
   await fs.mkdir(dest, { recursive: true });
   await fs.cp(localDir, dest, { recursive: true });
@@ -41,5 +54,12 @@ export async function saveHlsOutput(localDir, keyPrefix) {
 }
 
 export async function deleteFile(key) {
-  await fs.rm(resolveKey(key), {force: true});
+  if (useR2()) return r2Delete(key);
+  await fs.rm(resolveKey(key), { force: true });
+}
+
+export async function getLocalCopy(key, provider) {
+  if (provider !== 'r2') return { path: getFilePath(key), cleanup: async () => {} };
+  const p = await r2Download(key);
+  return { path: p, cleanup: () => fs.rm(p, { force: true }) };
 }
