@@ -8,7 +8,6 @@ import * as Sentry from '@sentry/node';
 import { logger } from './utils/logger.js';
 import { ApiError } from './utils/ApiError.js';
 import { sharePage, robots, sitemap } from './controllers/share.controller.js';
-import path from "path"
 import fs from "fs"
 
 
